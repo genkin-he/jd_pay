@@ -160,9 +160,6 @@ module JdPay
         decrypted, dropped = decrypted_and_dropped[0], decrypted_and_dropped[1]
         params = JdPay::Util.stringify_keys(dropped)
         string = JdPay::Util.params_to_string(params)
-        # p 'string'
-        # p string
-        # p sign
         raise JdPay::Error::InvalidRedirection.new unless Digest::SHA256.hexdigest(string) === JdPay::Sign.rsa_decrypt(sign, options)
         decrypted
       end
