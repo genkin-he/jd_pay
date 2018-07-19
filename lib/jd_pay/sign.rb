@@ -37,10 +37,10 @@ EOF
         params = params['jdpay'].dup
         sign_str = params.delete('sign')
         xml_without_sign = JdPay::Util.to_xml(params, root: 'jdpay')
-        ori_datas = [xml_without_sign, xml_without_sign.gsub("?>", " ?>")].map do |xml|
+        ori_data = [xml_without_sign, xml_without_sign.gsub("?>", " ?>")].map do |xml|
           Digest::SHA256.hexdigest(xml)
         end
-        ori_datas.include? rsa_decrypt(sign_str, options)
+        ori_data.include? rsa_decrypt(sign_str, options)
       end
     end
   end

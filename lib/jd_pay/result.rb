@@ -7,7 +7,7 @@ module JdPay
 
       self['jdpay'] = result['jdpay']
 
-      if result['jdpay'].class == Hash && (decrypt = self.decrypt_verify(options = {})).class == Hash
+      if result['jdpay'].class == Hash && (decrypt = self.verify_decrypt(options = {})).class == Hash
         self['jdpay'] = decrypt['jdpay']
       end
     end
@@ -16,7 +16,7 @@ module JdPay
       self['jdpay']['result']['code'] == SUCCESS_FLAG
     end
 
-    def decrypt_verify(options = {})
+    def verify_decrypt(options = {})
       if self.success?
         content_hash = Hash.from_xml JdPay::Des.decrypt_3des(Base64.decode64(self['jdpay']['encrypt']), options)
         JdPay::Sign.rsa_verify?(content_hash, options) ? content_hash : (raise "JdPay_verify_err:#{content_hash}")

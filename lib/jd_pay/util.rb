@@ -46,6 +46,34 @@ module JdPay
             </body>
         </html>".gsub(/>[[:space:]]+/, ">")
       end
+
+      def stringify_keys(hash)
+        new_hash = {}
+        hash.each do |key, value|
+          new_hash[(key.to_s rescue key) || key] = value
+        end
+        new_hash
+      end
+
+      def decrypt_and_drop_empty(hash)
+        decrypted = {}
+        new_hash = {}
+        hash.each do |k, v|
+          # Decrypt all valid value
+          if %w(tradeNum amount currency tradeTime note status).include? k
+            v = JdPay::Des.decrypt_3des(v) unless v == ''
+            decrypted[k] = v
+            # According to the doc, any empty value should be dropped.
+            next if v == ''
+            new_hash[k] = v
+          end
+        end
+        return decrypted, new_hash
+      end
+
+      def params_to_string(params)
+        params.sort.map { |item| item.join('=') }.join('&')
+      end
     end
   end
 end
