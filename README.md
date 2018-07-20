@@ -340,7 +340,7 @@ JdPay::QrService.refund(params, options = {})
 #### Definition
 
 ```ruby
-JdPay::QrService.verify_notification(params, options = {})
+JdPay::QrService.notify_verify(params, options = {})
 ```
 #### Example
 
