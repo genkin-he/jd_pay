@@ -1,6 +1,5 @@
 require 'rest_client'
 require 'active_support/core_ext/hash/conversions'
-require 'jd_pay/error'
 
 module JdPay
   module Service
@@ -13,8 +12,6 @@ module JdPay
     QRCODE_PAY_URL = 'https://paygate.jd.com/service/fkmPay'
     USER_RELATION_URL = 'https://paygate.jd.com/service/getUserRelation'
     CANCEL_USER_URL = 'https://paygate.jd.com/service/cancelUserRelation'
-    WEB_PAY_BASE_URL = 'https://wepay.jd.com/jdpay'
-    H5_PAY_BASE_URL = 'https://h5pay.jd.com/jdpay'
 
     class << self
       # the difference between pc and h5 is just request url
@@ -42,7 +39,7 @@ module JdPay
           params[k] = skip_encrypt_params.include?(k) ? v : JdPay::Des.encrypt_3des(v)
         end
         params[:sign] = sign
-        get_redirect_url(url, params)
+        JdPay::Util.build_pay_form(url, params)
       end
 
       UNIORDER_REQUIRED_FIELDS = [:tradeNum, :tradeName, :amount, :orderType, :notifyUrl, :userId]
@@ -144,24 +141,8 @@ module JdPay
         JdPay::Result.new(Hash.from_xml(invoke_remote(REVOKE_URL, make_payload(params), options)), options)
       end
 
-      # Deprecated, saving for backward compatibility
       def notify_verify(xml_str, options = {})
-        verify_notification(xml_str, options)
-      end
-
-      def verify_notification(xml_str, options = {})
         JdPay::Result.new(Hash.from_xml(xml_str), options)
-      end
-
-      def verify_redirection(params, options = {})
-        params = params.dup
-        sign = params.delete('sign')
-        decrypted_and_dropped = JdPay::Util.decrypt_and_drop_empty(params)
-        decrypted, dropped = decrypted_and_dropped[0], decrypted_and_dropped[1]
-        params = JdPay::Util.stringify_keys(dropped)
-        string = JdPay::Util.params_to_string(params)
-        raise JdPay::Error::InvalidRedirection.new unless Digest::SHA256.hexdigest(string) === JdPay::Sign.rsa_decrypt(sign, options)
-        decrypted
       end
 
       private
@@ -193,19 +174,6 @@ module JdPay
             headers: { content_type: 'application/xml' }
           }.merge(options)
         )
-      end
-
-      def get_redirect_url(url, payload)
-        baseUrl = WEB_PAY_BASE_URL
-        baseUrl = H5_PAY_BASE_URL if url === H5_PAY_URL
-        url = URI.parse(url)
-        http = Net::HTTP.new(url.host, url.port)
-        http.use_ssl = true
-        req = Net::HTTP::Post.new(url.to_s)
-        req.form_data = payload
-        req['Content-Type'] = 'application/x-www-form-urlencoded'
-        resp = http.request(req)
-        baseUrl + '/' + resp['location']
       end
     end
   end

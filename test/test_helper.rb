@@ -1,4 +1,5 @@
 require 'jd_pay'
+require 'jd_pay/v1/service'
 require 'minitest/autorun'
 require 'active_support/core_ext/hash/conversions'
 require 'active_support/builder'
