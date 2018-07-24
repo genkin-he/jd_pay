@@ -80,7 +80,7 @@ module JdPay
           if resp['location'].include? base_url
             redirect = resp['location']
           else
-            redirect = base_url + resp['location']
+            redirect = base_url + '/' + resp['location']
           end
           redirect
         end
