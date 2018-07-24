@@ -64,8 +64,8 @@ module JdPay
         end
 
         def get_redirect_url(url, payload)
-          baseUrl = WEB_PAY_BASE_URL
-          baseUrl = H5_PAY_BASE_URL if url === H5_PAY_URL
+          base_url = WEB_PAY_BASE_URL
+          base_url = H5_PAY_BASE_URL if url === H5_PAY_URL
           url = URI.parse(url)
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = true
@@ -73,7 +73,16 @@ module JdPay
           req.form_data = payload
           req['Content-Type'] = 'application/x-www-form-urlencoded'
           resp = http.request(req)
-          baseUrl + '/' + resp['location']
+          # This is really a bad design by JDPay.
+          # Examples:
+          # For h5pay: https://h5pay.jd.com/jdpay/payCashier?tradeNum=xxx&orderId=xxx&key=xxx
+          # For webpay: payCashier?tradeNum=xxx&ourTradeNum=xxx&key=xxx
+          if resp['location'].include? base_url
+            redirect = resp['location']
+          else
+            redirect = base_url + resp['location']
+          end
+          redirect
         end
       end
     end
