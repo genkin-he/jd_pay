@@ -111,7 +111,11 @@ pc_pay
 #### Definition
 
 ```ruby
+# 返回构建的表单，表单会自动发送POST请求，请求成功京东会进行页面跳转
 JdPay::Service.pc_pay(params, options = {})
+
+# 获取Redirect URL，前端获取后可以直接跳转京东收银台
+JdPay::Service.pc_pay(params, {:need_redirect_url => true})
 ```
 #### Example
 ```ruby
@@ -138,7 +142,11 @@ h5_pay
 #### Definition
 
 ```ruby
+# 返回构建的表单，表单会自动发送POST请求，请求成功京东会进行页面跳转
 JdPay::Service.h5_pay(params, options = {})
+
+# 获取Redirect URL，前端获取后可以直接跳转京东收银台
+JdPay::Service.h5_pay(params, {:need_redirect_url => true})
 ```
 
 ### 交易查询接口
@@ -247,6 +255,28 @@ JdPay::Service.notify_verify(xml_str, options = {})
   JdPay::Service.notify_verify(xml_str)
 ```
 
+### 支付成功页面跳转
+#### Name && Description
+> 用户支付成功后，京东支付系统根据支付接口中callbackUrl所传地址跳转到商户的支付成功页，并采用POST方式回传相应的订单参数。
+
+```ruby
+verify_redirection
+```
+#### Definition
+```ruby
+JdPay::Service.verify_redirection(params, options = {})
+```
+#### Example
+```ruby
+# In your controller:
+begin
+  decrypted_params = JdPay::Service.verify_redirection(request.params, {})
+rescue => e
+  render :status => :bad_request
+  return
+end
+```
+
 ### 用户关系查询接口
 #### Name && Description
 > 若商户用户与京东用户关联，下次支付时可跳过身份识别环境进行支付。此接口提供了用户关系查询功能。
@@ -346,103 +376,6 @@ JdPay::QrService.notify_verify(params, options = {})
 
 ```ruby
 # refer to：JdPay::Service.notify_verify(params, options = {})
-```
-
-## API migrate to V1
-Due to there are some breaking changes on API, so V1 version is created, which could keep the compatibility.
-
-### 在线支付接口PC
-#### Name && Description
-> 支付请求接口提供给商户向京东支付服务发送支付请求数据集合，京东支付服务会根据请求数据验证商户身份，以及验证支付信息是否被篡改。验证通过后，京东支付服务会在当前页面弹出支付页面弹框。
-
-```ruby
-pc_pay
-```
-#### Definition
-
-```ruby
-JdPay::Service::V1.pc_pay(params, options = {})
-```
-#### Example
-```ruby
-  # required keys
-  # [:tradeNum, :tradeName, :amount, :orderType, :notifyUrl, :callbackUrl, :userId]
-  params = {
-    tradeNum: '12345678',
-    tradeName: '测试商品',
-    amount: '1',
-    orderType: '0',
-    notifyUrl: 'http://making.dev/notify',
-    callbackUrl: 'http://frontend.com/return',
-    userId: "0000001"
-  }
-  JdPay::Service::V1.pc_pay(params)
-```
-### 在线支付接口H5
-#### Name && Description
-> 在线支付接口的手机版本，用法参照在线支付PC接口，不再赘述。
-
-```ruby
-h5_pay
-```
-#### Definition
-
-```ruby
-JdPay::Service::V1.h5_pay(params, options = {})
-```
-
-### 异步通知解密验签
-#### Name && Description
-> 商户后台将收到的京东异步通知XML内容解密及验签.
-
-```ruby
-verify_notification
-```
-#### Definition
-
-```ruby
-JdPay::Service::V1.verify_notification(xml_str, options = {})
-```
-#### Example
-
-```ruby
-  # required xml_str
-  xml_str = <<-EOF
-  <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-  <jdpay>
-    <version>V2.0</version>
-    <merchant>22294531</merchant>
-    <result>
-      <code>000000</code>
-      <desc>成功</desc>
-    </result>
-    <encrypt>MWM0MjhjYjk3YjhjNzZiNThjNjc0YmY1ZWJlY2QyODU0YTc5NmQ3ZWQxMWU1NzE3MWQ0OTUwOGI5NzllYmE4ZjM1YzRiZjlmYWE1M2ZiYjVjYTg5YjA4NTdhMjg3NTBhNzQxM2ZjOWFlN2U3YTNlYzM5ZTI5OTBkZDczNzQ5MjhjM2UxMjhkYWJhMGM0NWY2MWFjYjg2YWFlZDBjOTQ1Y2UyOWNlMDg2MmViOTQ3ZDUyZTczOTMxYjM0NGQwZTNjZGVjZTNkY2EwZmZlYzZlODE1Njc3YWMzODcyNTRhYTcyZDc5MjNhYzc5YWIzZGM0ZGIwYWE4NTc3ZTRhNmE3YmMxMjIwMmEyZmRjMDgxNjhlZjQ5ODVlNGIwNmU2ZTVjZjk3MWRlMmQ5NWYxMmJjNjQ3ZTY3MzhhNzRlOGJlMThlNzY0ZjJkYTAwODJjODNlMTlhZThlMjliYjIwZDVlNGM5NmNiZjJiZmZiNzViOWM2ZTE5Yjk5NWNlNGFhYjc5OTRhZmEyYzA4NjFiZmQ4OGM3ZmIwMzdjODlkOTU4MWQ1ZTc5MGY0NjIxZDY5M2ZjNzRiZDIwMTMyMGM5N2I5NzM1YjlkOTJjNDc5NTg5NzZlNTk0ZTJjMWZkNzU2YjAzOTFiMTRjZWI0MzJjNzhjNmVhNGY3OTM0MWU4NGI5Y2FmY2VjNWU3NGNlY2E1MjBiOTdlYjNiYmFkZDkyNmJhOWI3OTI4ZGQ5NTczMDY0ZmFiMjc5NzBkMmQ2ZTljMjM1MTM4N2E4MDhkZmUzMzc3Yzg5M2EzM2I0ZmU4MTA0MjA5YjA2YzUzMDZlNzNjNDQzZGU5OWRmMjk0YzU2YTUwMGZiYWMyNzhiOTVmM2ExMDk1NzFlZDE5NTZhMzM5MjI1Mjk3NmVlMjYwODJjOWMyNjUyMDllMzE4ZTBmMTY0MDgzYTU0ODMyOTFmNTFhMTcyMGYwMTQwOTg1NjdkYjZkZGZhZjI5NzE1ZTA5YjFhNDczNjZkNTY3MDYwZDRmZmIzZjVjNjgyZTczZjFmNjJmY2YxYWE1NDAxZDk4NDE0NjdhZDE5OTMxZGZkZDdjNWI0YzZlNTkzNjU3OGRkZTA1MmNhM2JiZDhmYjg3NWE3NDY2NjA0YTU0M2ExOWNiZjQyNzlhM2UyMDc3MzI3YjI3NWFlYjQ3ZmU3NjMyZTAxN2E4ZmZkY2UyZjg3M2I2ZTcwYTE4Y2MzNWE3YjFiNmZjYzJkY2E4MjNkZGNmNmFhOWRlZWQzYjE3NTI5MGQ5NDZkMTQ5NmFhZjJiOGM0OGEwNzU3OGM4ODIzZTVhNTU2YjU1OTk5ZTJiMjEwYmYzMjFmN2M5MmU3Yzc2NjJiMzdmNmI1Y2JjNjFiYjllYjY0Zjc3NWMwMDVlNGY4YmVjNzhmZWNmZGFmNWJkNjc2ODY1ZTAwYzllODRkNjg2ZDNmZTBjOTJiOTYwMjlmMWIxYThjMzQzYmE3YzkxNTUzMDI4OTBjYzU0YTJiMGM2Yjg1ZTQ=</encrypt>
-  </jdpay>
-  EOF
-
-  JdPay::Service::V1.verify_notification(xml_str)
-```
-
-### 支付成功页面跳转
-#### Name && Description
-> 用户支付成功后，京东支付系统根据支付接口中callbackUrl所传地址跳转到商户的支付成功页，并采用POST方式回传相应的订单参数。
-
-```ruby
-verify_redirection
-```
-#### Definition
-```ruby
-JdPay::Service::V1.verify_redirection(params, options = {})
-```
-#### Example
-```ruby
-# In your controller:
-begin
-  decrypted_params = JdPay::Service::V1.verify_redirection(request.params, {})
-rescue => e
-  render :status => :bad_request
-  return
-end
 ```
 
 
