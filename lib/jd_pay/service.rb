@@ -42,7 +42,6 @@ module JdPay
         end
         params[:sign] = sign
         options[:need_redirect_url] ? get_redirect_url(url, params) : JdPay::Util.build_pay_form(url, params)
-
       end
 
       UNIORDER_REQUIRED_FIELDS = [:tradeNum, :tradeName, :amount, :orderType, :notifyUrl, :userId]
@@ -155,7 +154,7 @@ module JdPay
         decrypted, dropped = decrypted_and_dropped[0], decrypted_and_dropped[1]
         params = JdPay::Util.stringify_keys(dropped)
         string = JdPay::Util.params_to_string(params)
-        raise JdPay::Error::InvalidRedirection.new unless Digest::SHA256.hexdigest(string) === JdPay::Sign.rsa_decrypt(sign, options)
+        raise JdPay::Error::InvalidRedirection.new unless Digest::SHA256.hexdigest(string) == JdPay::Sign.rsa_decrypt(sign, options)
         decrypted
       end
 
@@ -192,7 +191,7 @@ module JdPay
 
       def get_redirect_url(url, payload)
         base_url = WEB_PAY_BASE_URL
-        base_url = H5_PAY_BASE_URL if url === H5_PAY_URL
+        base_url = H5_PAY_BASE_URL if url == H5_PAY_URL
         url = URI.parse(url)
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
