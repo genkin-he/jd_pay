@@ -146,7 +146,6 @@ class JdPay::ServiceTest < Minitest::Test
       userId: '29d899fc35dc7aa50640156c06e5ec0f',
       sign: 'di/QyXcBJGY/Avb8ilTEUsCxto6F5fbjX4mvGt0a0J2XD1dTJ8sPidfTHofagsgz9H/CP3FC6Hqca49woS7o8vkn4oPfA+coHfxBnm4QtBcvdeQjW3fKq2IKbtGG7UGNGXEJc9Gk7BnXNnuvnbEc5FVFcvbqirdNi+7opO9jmaM='
     }).to_return(headers: {'Location' => 'payCashier?tradeNum=12345678&ourTradeNum=1234567890&key=fookey'}, status: 302)
-
     params = {
       tradeNum: '12345678',
       tradeName: '测试商品',
@@ -175,8 +174,6 @@ class JdPay::ServiceTest < Minitest::Test
       userId: '29d899fc35dc7aa50640156c06e5ec0f',
       sign: 'di/QyXcBJGY/Avb8ilTEUsCxto6F5fbjX4mvGt0a0J2XD1dTJ8sPidfTHofagsgz9H/CP3FC6Hqca49woS7o8vkn4oPfA+coHfxBnm4QtBcvdeQjW3fKq2IKbtGG7UGNGXEJc9Gk7BnXNnuvnbEc5FVFcvbqirdNi+7opO9jmaM='
     }).to_return(headers: {'Location' => 'payCashier?tradeNum=12345678&ourTradeNum=1234567890&key=fookey'}, status: 302)
-
-
     params = {
       tradeNum: '12345678',
       tradeName: '测试商品',
@@ -203,13 +200,11 @@ class JdPay::ServiceTest < Minitest::Test
       'tradeNum' => '8deb6f6eb7daed9119c6088b63f8eb3986f651ad81f83ba5',
       'tradeTime' => 'cdf7da29ab4ff16833fcd7d819ef300774d016b035035df2'
     }
-
     begin
       decrypted_param = JdPay::Service.verify_redirection(foo_params)
     rescue => e
       assert_equal e.class, JdPay::Error::InvalidRedirection
     end
-
     # valid param
     params = {
       'amount' => 'e5a6c3761ab9ddaf',
@@ -222,11 +217,8 @@ class JdPay::ServiceTest < Minitest::Test
       'tradeNum' => '38442bada8fcc81581d733ff756dc840272bf690d6b0c0e4',
       'tradeTime' => 'c33390d9b3d6d6699706ea1467616603a2a1506bbaaf0f59'
     }
-
     decrypted_param = JdPay::Service.verify_redirection(params)
     assert_equal decrypted_param, {"amount"=>"1", "currency"=>"CNY", "note"=>"", "status"=>"0", "tradeNum"=>"dev-1531882041-111", "tradeTime"=>"20180718104826"}
-
-
     # valid param & note is not null
     new_params = {
       'amount' => 'e5a6c3761ab9ddaf',
