@@ -203,12 +203,7 @@ module JdPay
         # Examples:
         # For h5pay: https://h5pay.jd.com/jdpay/payCashier?tradeNum=xxx&orderId=xxx&key=xxx
         # For webpay: payCashier?tradeNum=xxx&ourTradeNum=xxx&key=xxx
-        if resp['location'].include? base_url
-          redirect = resp['location']
-        else
-          redirect = base_url + '/' + resp['location']
-        end
-        redirect
+        resp['location'].include?(base_url) ? resp['location'] : "#{base_url}/#{resp['location']}"
       end
     end
   end

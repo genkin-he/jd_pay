@@ -68,7 +68,7 @@ module JdPay
             new_hash[k] = v
           end
         end
-        return decrypted, new_hash
+        [decrypted, new_hash]
       end
 
       def params_to_string(params)
