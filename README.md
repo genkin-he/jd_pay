@@ -5,6 +5,10 @@ Thanks for [alipay](https://github.com/chloerei/alipay) and [wx_pay](https://git
 
 JdPay official document: http://payapi.jd.com/.
 
+## Contributors
+
+See [Contributors page](https://github.com/genkin-he/jdpay/graphs/contributors).Special thanks to all of them.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -40,19 +44,11 @@ JdPay.qr_mch_id = 'YOUR_MERCHANT_NUM'
 JdPay.qr_des_key = 'YOUR_3DES_KEY'
 JdPay.qr_pri_key = 'YOUR_RSA_PRIVATE_KEY'
 
-#JdPay.pub_key = 'JDPAY_RSA_PUBLIC_KEY'
-#JdPay.debug_mode = true # Enable parameter check. Default is true.
+# jd's rsa public key, not merchant's.
+# JdPay.pub_key = 'JDPAY_RSA_PUBLIC_KEY'
+
+# JdPay.debug_mode = true # Enable parameter check. Default is true.
 ```
-
-*重要*：
-
-根据文档中的Q&A
-> 支付请求和异步返回的加密规则是什么？
-  答：支付请求用pkcs8的RSA私钥进行签名，des加密；
-    同步返回使用京东支付统一对外rsa公钥验签；
-    异步返回用3DES解密，京东支付统一对外rsa公钥验签。
-
-因此请勿为`JdPay.pub_key`设置你自己产生的公钥，默认不填就行。
 
 You can set default key, or pass a key directly to service method:
 
@@ -111,13 +107,13 @@ pc_pay
 #### Definition
 
 ```ruby
-# 返回构建的表单，表单会自动发送POST请求，请求成功京东会进行页面跳转
+# options
+#  need_redirect_url, Boolean, true: return a url, false: return a html, default: false
 JdPay::Service.pc_pay(params, options = {})
-
-# 获取Redirect URL，前端获取后可以直接跳转京东收银台
-JdPay::Service.pc_pay(params, {:need_redirect_url => true})
 ```
+
 #### Example
+
 ```ruby
   # required keys
   # [:tradeNum, :tradeName, :amount, :orderType, :notifyUrl, :callbackUrl, :userId]
@@ -142,11 +138,9 @@ h5_pay
 #### Definition
 
 ```ruby
-# 返回构建的表单，表单会自动发送POST请求，请求成功京东会进行页面跳转
+# options
+#  need_redirect_url, Boolean, true: return a url, false: return a html, default: false
 JdPay::Service.h5_pay(params, options = {})
-
-# 获取Redirect URL，前端获取后可以直接跳转京东收银台
-JdPay::Service.h5_pay(params, {:need_redirect_url => true})
 ```
 
 ### 交易查询接口
@@ -263,17 +257,18 @@ JdPay::Service.notify_verify(xml_str, options = {})
 verify_redirection
 ```
 #### Definition
+
 ```ruby
 JdPay::Service.verify_redirection(params, options = {})
 ```
 #### Example
+
 ```ruby
 # In your controller:
 begin
   decrypted_params = JdPay::Service.verify_redirection(request.params, {})
-rescue => e
-  render :status => :bad_request
-  return
+rescue => _ex
+  render status: :bad_request
 end
 ```
 
@@ -377,7 +372,6 @@ JdPay::QrService.notify_verify(params, options = {})
 ```ruby
 # refer to：JdPay::Service.notify_verify(params, options = {})
 ```
-
 
 ## Contributing
 

@@ -23,10 +23,8 @@ module JdPay
         xml.join
       end
 
-      def to_uri(params)
-        params.sort.map do |k, v|
-          "#{k}=#{v}"
-        end.compact.join('&')
+      def to_query(params)
+        params.sort.map { |k, v| "#{k}=#{v}" }.compact.join('&')
       end
 
       def denilize(h)
@@ -71,9 +69,6 @@ module JdPay
         [decrypted, new_hash]
       end
 
-      def params_to_string(params)
-        params.sort.map { |item| item.join('=') }.join('&')
-      end
     end
   end
 end

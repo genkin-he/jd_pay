@@ -17,12 +17,10 @@ module JdPay
     end
 
     def verify_decrypt(options = {})
-      if self.success?
-        content_hash = Hash.from_xml JdPay::Des.decrypt_3des(Base64.decode64(self['jdpay']['encrypt']), options)
-        JdPay::Sign.rsa_verify?(content_hash, options) ? content_hash : (raise "JdPay_verify_err:#{content_hash}")
-      else
-        raise "JdPay::Result#decrypt_verify_err:#{self}"
-      end
+      raise JdPay::Error::DecryptVerifyErr, "#{self}" unless self.success?
+      content_hash = Hash.from_xml JdPay::Des.decrypt_3des(Base64.decode64(self['jdpay']['encrypt']), options)
+      return content_hash if JdPay::Sign.rsa_verify?(content_hash, options)
+      raise JdPay::Error::DecryptVerifyErr, "#{content_hash}"
     end
   end
 end

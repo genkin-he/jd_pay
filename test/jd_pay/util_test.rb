@@ -20,9 +20,9 @@ class JdPay::UtilTest < Minitest::Test
     assert_equal xml, JdPay::Util.xml_out(params)
   end
 
-  def test_to_uri
+  def test_to_query
     uri = "he=zhi&meng=&zhi=he"
-    assert_equal uri, JdPay::Util.to_uri(@params)
+    assert_equal uri, JdPay::Util.to_query(@params)
   end
 
   def test_build_pay_form

@@ -35,7 +35,7 @@ module JdPay
         }.merge(params)
 
         check_required_options(params, WEB_PAY_REQUIRED_FIELDS)
-        sign = JdPay::Sign.rsa_encrypt(JdPay::Util.to_uri(params), options)
+        sign = JdPay::Sign.rsa_encrypt(JdPay::Util.to_query(params), options)
         skip_encrypt_params = %i(version merchant)
         params.each do |k, v|
           params[k] = skip_encrypt_params.include?(k) ? v : JdPay::Des.encrypt_3des(v)
@@ -153,8 +153,10 @@ module JdPay
         decrypted_and_dropped = JdPay::Util.decrypt_and_drop_empty(params)
         decrypted, dropped = decrypted_and_dropped[0], decrypted_and_dropped[1]
         params = JdPay::Util.stringify_keys(dropped)
-        string = JdPay::Util.params_to_string(params)
-        raise JdPay::Error::InvalidRedirection.new unless Digest::SHA256.hexdigest(string) == JdPay::Sign.rsa_decrypt(sign, options)
+        string = JdPay::Util.to_query(params)
+        unless Digest::SHA256.hexdigest(string) == JdPay::Sign.rsa_decrypt(sign, options)
+          raise JdPay::Error::InvalidRedirection, "decrypted:#{decrypted};dropped:#{dropped}"
+        end
         decrypted
       end
 
