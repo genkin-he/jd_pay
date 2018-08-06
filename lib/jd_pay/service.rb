@@ -12,8 +12,8 @@ module JdPay
     QRCODE_PAY_URL = 'https://paygate.jd.com/service/fkmPay'
     USER_RELATION_URL = 'https://paygate.jd.com/service/getUserRelation'
     CANCEL_USER_URL = 'https://paygate.jd.com/service/cancelUserRelation'
-    WEB_PAY_BASE_URL = 'https://wepay.jd.com/jdpay'
-    H5_PAY_BASE_URL = 'https://h5pay.jd.com/jdpay'
+    WEB_PAY_BASE_URL = 'https://wepay.jd.com/jdpay/payCashier'
+    H5_PAY_BASE_URL = 'https://h5pay.jd.com/jdpay/payCashier'
 
     class << self
       # the difference between pc and h5 is just request url
@@ -205,7 +205,7 @@ module JdPay
         # Examples:
         # For h5pay: https://h5pay.jd.com/jdpay/payCashier?tradeNum=xxx&orderId=xxx&key=xxx
         # For webpay: payCashier?tradeNum=xxx&ourTradeNum=xxx&key=xxx
-        resp['location'].include?(base_url) ? resp['location'] : "#{base_url}/#{resp['location']}"
+        resp['location'].include?(base_url) ? resp['location'] : "#{base_url}?#{resp['location'].split('?')[1]}"
       end
     end
   end
