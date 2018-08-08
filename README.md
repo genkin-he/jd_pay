@@ -143,6 +143,9 @@ h5_pay
 JdPay::Service.h5_pay(params, options = {})
 ```
 
+### **Important notice for `need_redirect_url`**
+Due to unstable redirect url in JDPay's side, we manually organize the redirect url on our own. Please check method [get_redirect_url](https://github.com/genkin-he/jdpay/blob/master/lib/jd_pay/service.rb#L194-L209) for more details. **If any unexpected response is met, please fill an issue.**
+
 ### 交易查询接口
 #### Name && Description
 > 交易查询接口是为了处理商户服务器长时间没有接收到支付结果的情况设计的。一般情况，支付结果会通过前端同步返回和京东支付服务器的异步通知发送到商户服务。但是为避免特殊情况商户服务器仍然没有接收到支付结果，这时候商户服务可以通过主动查询交易结果的接口查询支付状态。
